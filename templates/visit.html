@@ -1,0 +1,78 @@
+{% extends 'layout.html' %}
+
+{% block head %} {% endblock %}
+
+{% block content %}
+<style>
+    .pf {
+        vertical-align: middle;
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+    }
+</style>
+
+<br>
+<div align="center" class="rounded mx-auto d-block">
+    <img src="/static/uploads/{{data.id}}/{{data.pic}}" class="pf">
+    <br>
+</div>
+<br>
+<div class="container">
+
+    <table class="table table-bordered">
+
+        <body>
+            <tr>
+                <th>ชื่อบริษัท</th>
+
+                <th>
+                    {{data.fullname}}
+                </th>
+
+            </tr>
+        </body>
+
+        <body>
+            <tr>
+                <td>ประเภทกิจการ</td>
+                <td>
+                    {% for tag in tags %}
+
+                    / {{tag}} 
+
+                    {% endfor %}
+                </td>
+            </tr>
+        </body>
+
+        <body>
+            <tr>
+                <td>รายละเอียด</td>
+                <td>
+                {{data.desc}} 
+                </td>
+            </tr>
+        </body>
+        
+        <body>
+            <tr>
+                <td>เรทการว่าจ้าง</td>
+                <td>{{data.pay_rate}}</td>
+            </tr>
+        </body>
+        
+        <tbody>
+            <tr>
+                <td>E-mail</td>
+                <td>{{data.email}}</td>
+            </tr>
+        </tbody> 
+        </tbody>
+    </table>
+</div>
+<br><br>
+
+
+
+{% endblock %}
