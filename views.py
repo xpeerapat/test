@@ -1,6 +1,7 @@
-from app import app, db
+from sqlalchemy.sql.elements import Null
+from app import *
 from models import *
-
+ 
 
 # @app.route('/')
 # def index():
@@ -10,12 +11,11 @@ from models import *
 class Conn():
 
     def toCheck(a):
-        username = db.session.query(User).filter(User.username == a).first()
+        username = db.session.query(User).filter(or_(User.username == a, User.email == a)).first()
         return username
 
     def toLogin(a, b):
-        username = db.session.query(User).filter(
-            and_(User.username == a, User.password == b)).first()
+        username = db.session.query(User).filter(and_(or_(User.username == a,User.email == a), User.password == b)).first()
         return username
 
     def toRegister(a, b, c, d, e):
@@ -27,34 +27,37 @@ class Conn():
         profile = db.session.query(User).filter(User.id == a).first()
         return profile
 
-    def toUpdate(a, b, c, d, e, f, g, h):
+    def toUpdateYT(a, b, c, d, e, f, g , h):
         updated = db.session.query(User).filter(User.id == a).first()
         updated.fullname = b
         updated.desc = c
         updated.email = d
         updated.password = e
         updated.pay_rate = f
-        updated.id_channel = g
-        updated.pic = h
+        updated.pic = g
+        updated.id_channel = h
         db.session.commit()
 
-    def uploadImg(a, b,): 
+    def toUpdateSP(a, b, c, d, e, f):
+        updated = db.session.query(User).filter(User.id == a).first()
+        updated.fullname = b
+        updated.desc = c
+        updated.email = d
+        updated.password = e
+        updated.pay_rate = f
+        db.session.commit()
+
+    def toSearch(a):
+        fullname = db.session.query(User).filter(User.fullname == a).first()
+        return fullname
+
+    def uploadImg(a, b): 
         user = db.session.query(User).filter(User.id == a).first() 
         user.pic = b
         db.session.commit()
 
         return user
  
-
-    # # PROFILE
-    # def getImg(me):
-    #     owner = str(me)
-    #     img = db.session.query(User).filter(User.id == me).first()
-
-    #     return [owner, img]
-
-
-  
  
 
 class Style():
@@ -88,6 +91,16 @@ class Style():
     def byTag(a):
         data = db.session.query(User).join(style).filter(style.c.tag_id == a).all()
         return data
+
+    def showTag(id):
+        tags = []
+        pos = Style.showPos(id)  # [1,0,1,0,1]
+        style = posToId(pos)     # [1,3,5]
+
+        for i in style:
+            x = id2name(i)
+            tags.append(x)
+        return tags              # ['Entertainment','Education','Travel']
 
 
 # TAG position

@@ -3,6 +3,7 @@ from flask.views import View
 from views import *
 from models import *
 
+
 class IndexView(View):
     def dispatch_request(self):
         if 'loggedin' not in session:
@@ -10,7 +11,7 @@ class IndexView(View):
             return render_template('/login.html')
 
         return redirect(url_for('recommended'))
-        #return render_template('/index.html')
+        # return render_template('/index.html')
 
 
 class RoleRegister(View):
@@ -34,25 +35,33 @@ class RoleRegister(View):
         if request.method == 'POST':
             username = request.form['username']
             password = request.form['password']
+            repassword = request.form['repassword']
             fullname = request.form['fullname']
             email = request.form['email']
             role = request.form['role']
             check = Conn.toCheck(username)
+            check2 = Conn.toCheck(email)
 
-            if not username or not password or not fullname or not email:
+            if not username or not password or not repassword or not fullname or not email:
                 error = 'Fill out the form'
 
             if check:
-                error = 'Username already exists!'
+                error = 'Username already exist!'
+            
+            if check2:
+                error = 'Email already used!'
+
+            if password != repassword:
+                error = "Password and re-password don't match"
 
             if error is None:
                 Conn.toRegister(username, password, fullname, email, role)
                 flash('Register done!')
                 return redirect(url_for('index'))
 
-            flash(check)
+            flash(error)
 
-        return render_template('/registerform.html',)
+        return render_template('/registerform.html',password=password,repassword=repassword)
 
 
 class LoginForm(View):
@@ -62,22 +71,31 @@ class LoginForm(View):
             if request.method == 'POST':
                 username = request.form['username']
                 password = request.form['password']
+
+                try:
+                    if request.form['remember']:
+                        remember = True
+                except:
+                    remember = False
+ 
                 error = None
-                User = Conn.toLogin(username, password)
+                user = Conn.toLogin(username, password)
 
                 if not username or not password:
                     error = 'Fill out the form'
 
-                if User is None:
-                    error = 'Incorrect username.'
+                elif user is None:
+                    error = 'Incorrect User or Password.'
 
                 elif error is None:
-                    session['id'] = User.id
+                    session['id'] = user.id
+                    session['role'] = user.role
                     session['loggedin'] = True
-                    session['role'] = User.role
+                    session.permanent = remember
+
                     return redirect(url_for('recommended'))
 
-                flash(error)
+                flash(error) 
 
             return redirect(url_for('index'))
 
@@ -85,4 +103,5 @@ class LoginForm(View):
 
     def logout():
         session.clear()
+        session.permanent = False
         return render_template('/login.html')
